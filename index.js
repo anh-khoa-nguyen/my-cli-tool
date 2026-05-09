@@ -5,16 +5,16 @@ const ora = require('ora');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER_URL = 'http://localhost:3000/api/ask'; 
+const SERVER_URL = 'http://localhost:3000/api/ask';
 
 program
-  .version('1.0.0')
-  .description('Tro ly AI tren Terminal (Ho tro tieng Viet khong dau)');
+    .version('1.0.0')
+    .description('Tro ly AI tren Terminal (Ho tro tieng Viet khong dau)');
 
 program
-  .option('-s, --shell <query>', 'Hoi AI lenh shell script')
-  .option('-p, --python <query>', 'Hoi AI lenh python')
-  .option('-t, --test <filepath>', 'Kiem tra loi cu phap cua file');
+    .option('-s, --shell <query>', 'Hoi AI lenh shell script')
+    .option('-p, --python <query>', 'Hoi AI lenh python')
+    .option('-t, --test <filepath>', 'Kiem tra loi cu phap cua file');
 
 program.parse(process.argv);
 const options = program.opts();
@@ -36,7 +36,7 @@ async function sendRequest(content, type, loadingMsg) {
         });
 
         spinner.stop();
-        
+
         if (response.data.success) {
             // In ket qua tu AI tra ve
             console.log("\n" + removeAccents(response.data.text) + "\n");
@@ -53,13 +53,13 @@ async function sendRequest(content, type, loadingMsg) {
 // XU LY LOGIC CAC LENH
 if (options.shell) {
     sendRequest(options.shell, 'shell', 'dang tim lenh shell...');
-} 
+}
 else if (options.python) {
     sendRequest(options.python, 'python', 'dang tim lenh python...');
-} 
+}
 else if (options.test) {
     const filePath = path.resolve(options.test);
-    
+
     // Kiem tra xem file co ton tai khong
     if (!fs.existsSync(filePath)) {
         console.log(`loi: khong tim thay file ${options.test}`);
@@ -69,7 +69,7 @@ else if (options.test) {
     // Doc noi dung file va gui len cho AI
     const fileContent = fs.readFileSync(filePath, 'utf8');
     sendRequest(fileContent, 'check', 'dang kiem tra loi file...');
-} 
+}
 else {
     if (process.argv.length <= 2) {
         program.help();
