@@ -5,7 +5,7 @@ const ora = require('ora');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER_URL = 'http://localhost:3000/api/ask';
+const SERVER_URL = 'https://spleeniest-snippier-agustin.ngrok-free.dev/api/ask';
 
 program
     .version('1.0.0')
