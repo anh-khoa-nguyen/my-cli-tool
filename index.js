@@ -5,7 +5,7 @@ const ora = require('ora');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER_URL = 'https://spleeniest-snippier-agustin.ngrok-free.dev/api/ask';
+const SERVER_URL = 'https://spleeniest-snippier-agustin.ngrok-free.dev/api/ask'; 
 
 program
     .version('1.0.0')
@@ -34,36 +34,39 @@ async function sendRequest(content, type, loadingMsg) {
             content: cleanContent,
             type: type
         }, {
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
-            }
+            headers: { 'ngrok-skip-browser-warning': 'true' },
+            timeout: 10000 // Them timeout 10 giay neu server qua cham
         });
 
         spinner.stop();
 
-        if (response.data.success) {
-            // In ket qua tu AI tra ve
-            console.log("\n" + removeAccents(response.data.text) + "\n");
+        if (response.data && response.data.text) {
+            const output = removeAccents(response.data.text).trim();
+            if (output) {
+                process.stdout.write('\n' + output + '\n\n');
+            } else {
+                process.stdout.write('khong co phan hoi tu AI\n');
+            }
         } else {
-            console.log("loi: server xu ly that bai.");
+            process.stdout.write('loi: phan hoi server khong hop le\n');
         }
 
     } catch (error) {
         spinner.stop();
-        console.log("loi: khong the ket noi toi server.");
+        process.stdout.write('loi: khong the ket noi toi server.\n');
     }
 }
 
 // XU LY LOGIC CAC LENH
 if (options.shell) {
     sendRequest(options.shell, 'shell', 'dang tim lenh shell...');
-}
+} 
 else if (options.python) {
     sendRequest(options.python, 'python', 'dang tim lenh python...');
-}
+} 
 else if (options.test) {
     const filePath = path.resolve(options.test);
-
+    
     // Kiem tra xem file co ton tai khong
     if (!fs.existsSync(filePath)) {
         console.log(`loi: khong tim thay file ${options.test}`);
@@ -73,7 +76,7 @@ else if (options.test) {
     // Doc noi dung file va gui len cho AI
     const fileContent = fs.readFileSync(filePath, 'utf8');
     sendRequest(fileContent, 'check', 'dang kiem tra loi file...');
-}
+} 
 else {
     if (process.argv.length <= 2) {
         program.help();
