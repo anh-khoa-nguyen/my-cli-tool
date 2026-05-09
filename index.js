@@ -1,81 +1,76 @@
 #!/usr/bin/env node
-
-const { Command } = require('commander');
-const { spawnSync } = require('child_process');
-const path = require('path');
+const { program } = require('commander');
 const axios = require('axios');
 const ora = require('ora');
+const fs = require('fs');
+const path = require('path');
 
-const program = new Command();
-const SERVER_URL = 'http://localhost:3000/api/ask';
-
-program
-  .name('mycmd')
-  .description('Trợ lý AI và công cụ kiểm tra cú pháp trên Terminal')
-  .version('1.0.0');
+const SERVER_URL = 'http://localhost:3000/api/ask'; 
 
 program
-  .option('-t, --test <file>', 'Kiểm tra cú pháp của file (.sh hoặc .py)')
-  .option('-s, --shell <query>', 'Hỏi AI lệnh Shell Script')
-  .option('-p, --python <query>', 'Hỏi AI lệnh Python');
+  .version('1.0.0')
+  .description('Tro ly AI tren Terminal (Ho tro tieng Viet khong dau)');
 
-async function askAI(question, type) {
-    const spinner = ora(`Đang hỏi AI cách viết ${type}...`).start();
+program
+  .option('-s, --shell <query>', 'Hoi AI lenh shell script')
+  .option('-p, --python <query>', 'Hoi AI lenh python')
+  .option('-t, --test <filepath>', 'Kiem tra loi cu phap cua file');
+
+program.parse(process.argv);
+const options = program.opts();
+
+// Ham xoa dau tieng Viet (phong truong hop user go co dau)
+function removeAccents(str) {
+    if (!str) return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+}
+
+async function sendRequest(content, type, loadingMsg) {
+    const cleanContent = removeAccents(content);
+    const spinner = ora(loadingMsg).start();
 
     try {
         const response = await axios.post(SERVER_URL, {
-            question: question,
+            content: cleanContent,
             type: type
         });
 
         spinner.stop();
         
         if (response.data.success) {
-            console.log("\n" + response.data.code + "\n");
+            // In ket qua tu AI tra ve
+            console.log("\n" + removeAccents(response.data.text) + "\n");
         } else {
-            console.log("❌ Có lỗi từ server.");
+            console.log("loi: server xu ly that bai.");
         }
 
     } catch (error) {
         spinner.stop();
-        console.log("❌ Không thể kết nối tới Server. Vui lòng kiểm tra lại mạng hoặc Server đang tắt.");
+        console.log("loi: khong the ket noi toi server.");
     }
 }
 
-program.parse(process.argv);
-const options = program.opts();
-
-if (options.test) {
-    const filePath = options.test;
-    const ext = path.extname(filePath).toLowerCase();
+// XU LY LOGIC CAC LENH
+if (options.shell) {
+    sendRequest(options.shell, 'shell', 'dang tim lenh shell...');
+} 
+else if (options.python) {
+    sendRequest(options.python, 'python', 'dang tim lenh python...');
+} 
+else if (options.test) {
+    const filePath = path.resolve(options.test);
     
-    let cmd = '';
-    let args = [];
-
-    if (ext === '.sh') {
-      cmd = 'bash';
-      args = ['-n', filePath];
-    } else if (ext === '.py') {
-      cmd = 'python';
-      args = ['-m', 'py_compile', filePath];
-    } else {
-      console.log(`\x1b[31m[LỖI] Không hỗ trợ định dạng file ${ext}. Chỉ hỗ trợ .sh và .py\x1b[0m`);
-      process.exit(1);
+    // Kiem tra xem file co ton tai khong
+    if (!fs.existsSync(filePath)) {
+        console.log(`loi: khong tim thay file ${options.test}`);
+        process.exit(1);
     }
 
-    const result = spawnSync(cmd, args, { encoding: 'utf8', shell: true });
-
-    if (result.status === 0) {
-      console.log(`\x1b[32m[OK] File ${filePath} không có lỗi cú pháp.\x1b[0m`);
-    } else {
-      console.log(`\x1b[31m[LỖI] Kiểm tra cú pháp thất bại cho ${filePath}:\x1b[0m`);
-      console.log(`\x1b[31m${result.stderr || result.stdout}\x1b[0m`);
-    }
-} else if (options.shell) {
-    askAI(options.shell, 'shell');
-} else if (options.python) {
-    askAI(options.python, 'python');
-} else {
+    // Doc noi dung file va gui len cho AI
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    sendRequest(fileContent, 'check', 'dang kiem tra loi file...');
+} 
+else {
     if (process.argv.length <= 2) {
         program.help();
     }
