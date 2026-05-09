@@ -33,6 +33,10 @@ async function sendRequest(content, type, loadingMsg) {
         const response = await axios.post(SERVER_URL, {
             content: cleanContent,
             type: type
+        }, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
 
         spinner.stop();
