@@ -31,7 +31,7 @@ app.post('/api/ask', async (req, res) => {
             2. Code phai chay duoc ngay lap tuc.
             3. Xoa bo tat ca cac dong mo ta bang ngon ngu tu nhien cua user.
             4. Khong dung markdown (khong co \`\`\`).
-            5. Het suc ton trong code goc va hay sua dua tren code goc cua nguoi dung cho dung logic dam bao chuong trinh chay duoc`;
+            5. Het suc ton trong code goc va hay sua dua tren code goc cua nguoi dung cho dung logic dam bao chuong trinh chay duoc, khong tu y thay doi huong ma nguoi dung suy nghi`;
         }
 
         const chatCompletion = await groq.chat.completions.create({
