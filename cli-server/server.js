@@ -17,7 +17,7 @@ app.post('/api/ask', async (req, res) => {
 
         if (type === 'shell' || type === 'python') {
             systemPrompt = "Ban la chuyen gia code. CHI tra ve duy nhat 1 dong code, khong giai thich.";
-        } 
+        }
         else if (type === 'check') {
             systemPrompt = "Ban la may check loi cu phap. Dung: tra ve 'ok', Sai: tra ve 'sai o dong [x]: [ly do]'. Khong dau, ngan gon.";
         }
@@ -30,7 +30,8 @@ app.post('/api/ask', async (req, res) => {
             1. CHI TRA VE CODE, khong co bat ky comment nao (#), khong giai thich.
             2. Code phai chay duoc ngay lap tuc.
             3. Xoa bo tat ca cac dong mo ta bang ngon ngu tu nhien cua user.
-            4. Khong dung markdown (khong co \`\`\`).`;
+            4. Khong dung markdown (khong co \`\`\`).
+            5. Het suc ton trong code goc va hay sua dua tren code goc cua nguoi dung cho dung logic dam bao chuong trinh chay duoc`;
         }
 
         const chatCompletion = await groq.chat.completions.create({
@@ -38,7 +39,7 @@ app.post('/api/ask', async (req, res) => {
                 { role: "system", content: systemPrompt },
                 { role: "user", content: content }
             ],
-            model: "llama3-70b-8192", // Dung model manh de viet code dai
+            model: "openai/gpt-oss-120b", // Dung model manh de viet code dai
             temperature: 0.1,
         });
 
