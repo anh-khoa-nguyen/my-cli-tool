@@ -4,13 +4,13 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER_URL = 'https://spleeniest-snippier-agustin.ngrok-free.dev/api/ask'; 
+const SERVER_URL = 'https://spleeniest-snippier-agustin.ngrok-free.dev/api/ask';
 
 program
-  .option('-s, --shell <query>', 'Hoi lenh shell')
-  .option('-p, --python <query>', 'Hoi lenh python')
-  .option('-t, --test <filepath>', 'Kiem tra file')
-  .option('-n, --next <filepath>', 'Hoan thien file va ghi de'); // Option moi
+    .option('-s, --shell <query>', 'Hoi lenh shell')
+    .option('-p, --python <query>', 'Hoi lenh python')
+    .option('-t, --test <filepath>', 'Kiem tra file')
+    .option('-n, --next <filepath>', 'Hoan thien file va ghi de'); // Option moi
 
 program.parse(process.argv);
 const options = program.opts();
@@ -33,11 +33,11 @@ async function sendRequest(content, type, filePath = null) {
 
         if (response.data.success) {
             const result = response.data.text.trim();
-            
+
             if (type === 'next' && filePath) {
                 // GHI DE VAO FILE
                 fs.writeFileSync(filePath, result, 'utf8');
-                process.stdout.write(`da hoan thien file: ${path.basename(filePath)}\n`);
+                process.stdout.write(`${path.basename(filePath)}\n`);
             } else {
                 process.stdout.write(removeAccents(result) + '\n');
             }
@@ -50,10 +50,10 @@ async function sendRequest(content, type, filePath = null) {
 // DIEU HUONG
 if (options.shell) {
     sendRequest(options.shell, 'shell');
-} 
+}
 else if (options.python) {
     sendRequest(options.python, 'python');
-} 
+}
 else if (options.test) {
     const f = path.resolve(options.test);
     if (fs.existsSync(f)) sendRequest(fs.readFileSync(f, 'utf8'), 'check');

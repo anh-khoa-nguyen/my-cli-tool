@@ -16,22 +16,24 @@ app.post('/api/ask', async (req, res) => {
         let systemPrompt = "";
 
         if (type === 'shell' || type === 'python') {
-            systemPrompt = "Ban la chuyen gia code. CHI tra ve duy nhat 1 dong code, khong giai thich.";
+            const lang = type === 'shell' ? 'Bash Shell' : 'Python';
+            systemPrompt = `Ban la chuyen gia code ${lang}. CHI tra ve duy nhat 1 dong code, khong giai thich.`;
         }
         else if (type === 'check') {
             systemPrompt = "Ban la may check loi cu phap. Dung: tra ve 'ok', Sai: tra ve 'sai o dong [x]: [ly do]'. Khong dau, ngan gon.";
         }
         else if (type === 'next') {
-            // PROMPT CHO TINH NANG -n
-            systemPrompt = `Ban la chuyen gia lap trinh ${ext === '.py' ? 'Python' : 'Bash Shell'}.
-            User se gui mot file co code do dang hoac mo ta bang comment.
-            NHIEM VU: Viet lai toan bo file hoan chinh, logic chay tot.
-            QUY TAC QUAN TRONG:
-            1. CHI TRA VE CODE, khong co bat ky comment nao (#), khong giai thich.
-            2. Code phai chay duoc ngay lap tuc.
-            3. Xoa bo tat ca cac dong mo ta bang ngon ngu tu nhien cua user.
-            4. Khong dung markdown (khong co \`\`\`).
-            5. Het suc ton trong code goc va hay sua dua tren code goc cua nguoi dung cho dung logic dam bao chuong trinh chay duoc, khong tu y thay doi huong ma nguoi dung suy nghi`;
+            // PROMPT ĐÃ ĐƯỢC CẢI TIẾN ĐỂ ÉP AI GIỮ NGUYÊN CODE GỐC
+            systemPrompt = `Bạn là công cụ hoàn thiện và sửa lỗi code ${ext === '.py' ? 'Python' : 'Bash Shell'}.
+            Người dùng sẽ gửi một đoạn code dở dang hoặc có chứa các comment mô tả logic cần viết thêm.
+
+            RÀNG BUỘC TỐI CAO (BẮT BUỘC PHẢI TUÂN THỦ 100%):
+            1. GIỮ NGUYÊN CẤU TRÚC GỐC: Tuyệt đối giữ nguyên tên biến, tên hàm, và cấu trúc luồng (if/else, vòng lặp) mà người dùng đã viết.
+            2. KHÔNG ĐƯỢC REFACTOR: Tuyệt đối không tự ý tối ưu hóa, viết ngắn lại hay thay đổi thuật toán theo cách của bạn. Khách hàng viết thế nào, bạn đi tiếp theo hướng đó.
+            3. CHỈ ĐIỀN VÀ SỬA LỖI: Nhiệm vụ duy nhất của bạn là viết tiếp những phần code còn thiếu dựa trên comment, và sửa các lỗi cú pháp (nếu có) để code chạy được.
+            4. FIX CODE: Bạn có thể dựa vào comment mô tả lỗi của chương trình để fix lại cho đúng trong trường hợp chương trình đang không ổn
+            4. Xóa bỏ các dòng comment yêu cầu (bằng ngôn ngữ tự nhiên) của user sau khi đã chuyển nó thành code.
+            5. FORMAT OUTPUT: TRẢ VỀ DUY NHẤT CODE THUẦN TÚY. Không sử dụng markdown (không có \`\`\`), không giải thích, không xin chào. Code phải chạy được ngay lập tức.`;
         }
 
         const chatCompletion = await groq.chat.completions.create({
